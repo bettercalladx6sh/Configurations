@@ -1,0 +1,77 @@
+# ============================================================
+# Node.js CI Workflow Guide
+# ============================================================
+#
+# BEFORE USING THIS WORKFLOW, CHECK THE FOLLOWING:
+#
+# 1. [NODE-VERSION]
+#    Node.js version used for the project.
+#
+#    Current version:
+#      22.x
+#
+#    Change it if your project uses another version.
+#    Example:
+#      node-version: [20.x]
+#
+# 2. package.json
+#    Make sure your project contains:
+#
+#      "scripts": {
+#        "build": "..."
+#      }
+#
+#    The workflow runs:
+#      npm ci
+#      npm run build
+#
+# 3. package-lock.json
+#    Make sure package-lock.json is committed to the
+#    repository because npm ci requires it.
+#
+# 4. Branch
+#    The workflow currently runs when:
+#
+#      - Code is pushed to main
+#      - A pull request targets main
+#
+#    Change "main" if your default branch has another name.
+#
+# ============================================================
+# This workflow:
+#
+#   1. Checks out the repository
+#   2. Installs the required Node.js version
+#   3. Restores npm dependency cache
+#   4. Installs dependencies using npm ci
+#   5. Builds the application
+#
+# ============================================================
+
+name: Node.js CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - run: npm ci
+      - run: npm run build
